@@ -14,7 +14,7 @@ front of company policy documents.
 | Module | Path | Marks | Status |
 |---|---|---|---|
 | Data Pipeline | [`/data_pipeline`](./data_pipeline/README.md) | 25 | Complete |
-| Analytics | [`/analytics`](./analytics/README.md) | 50 | In progress |
+| Analytics | [`/analytics`](./analytics/README.md) | 50 | Complete |
 | Support Assistant | [`/support_assistant`](./support_assistant/README.md) | 25 | Not started |
 
 ## Setup
@@ -41,7 +41,16 @@ See [`data_pipeline/README.md`](./data_pipeline/README.md) for full design
 decisions and query output.
 
 ### Analytics (`/analytics`)
-_To be added._
+\`\`\`
+python analytics\01_load_and_profile.py
+python analytics\02_univariate.py
+python analytics\03_bivariate.py
+python analytics\04_data_story.py
+python analytics\05_standardization_check.py
+python analytics\06_modeling.py
+\`\`\`
+See [`analytics/README.md`](./analytics/README.md) for the full EDA
+write-up, model comparison tables, and final recommendation.
 
 ### Support Assistant (`/support_assistant`)
 _To be added._
@@ -52,5 +61,11 @@ _To be added._
   books.toscrape.com, cleaned into typed columns, converted GBP to INR
   using the required fixed rate (1 GBP = 105.50 INR), and loaded into a
   normalized two-table SQLite schema. Full details in the module README.
-- **Analytics:** _to be added as this module is built._
+- **Analytics:** cleaned the Titanic dataset per a missing-value threshold
+  rule, ran full univariate/bivariate/multivariate EDA with a 4-chart data
+  story, then built a leak-safe classification pipeline (Logistic
+  Regression, Decision Tree, Random Forest) plus a fare-prediction
+  regression side-task. Random Forest was selected as the recommended
+  deployment model based on accuracy/F1/recall. Full details, all metrics,
+  and the final recommendation are in the module README.
 - **Support Assistant:** _to be added as this module is built._
