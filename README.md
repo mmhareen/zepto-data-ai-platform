@@ -50,9 +50,7 @@ decisions and query output.
 See [`analytics/README.md`](./analytics/README.md) for the full EDA
 write-up, model comparison tables, and final recommendation.
 
-### Support Assistant
-
- (`/support_assistant`)
+### Support Assistant (`/support_assistant`)
 
     python support_assistant\build_index.py
     uvicorn support_assistant.main:app --reload
