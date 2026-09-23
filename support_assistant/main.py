@@ -1,4 +1,5 @@
-﻿from fastapi import FastAPI
+"""FastAPI wrapper exposing the LangGraph support assistant via POST /ask."""
+from fastapi import FastAPI
 from pydantic import BaseModel
 from .graph import app_graph
 from .schemas import SupportResponse
@@ -12,6 +13,11 @@ class AskRequest(BaseModel):
 
 @app.post("/ask", response_model=SupportResponse)
 def ask(request: AskRequest) -> SupportResponse:
+    """Run a query through the graph and return a validated response.
+
+    Falls back to a safe error response instead of a raw 500 if anything
+    in the graph raises (e.g. an unimplemented MOCK_LLM=0 path).
+    """
     initial_state = {
         "query": request.query,
         "intent": "",
@@ -19,7 +25,15 @@ def ask(request: AskRequest) -> SupportResponse:
         "sources": [],
         "confidence": 0.0
     }
-    result = app_graph.invoke(initial_state)
+    try:
+        result = app_graph.invoke(initial_state)
+    except Exception as exc:
+        return SupportResponse(
+            answer=f"Sorry, something went wrong processing your request: {exc}",
+            sources=[],
+            confidence=0.0
+        )
+
     return SupportResponse(
         answer=result["answer"],
         sources=result["sources"],
