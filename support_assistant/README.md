@@ -53,6 +53,34 @@ Request: {"query": "What is the capital of France?"}
 
 ## Architecture: the RAG pipeline
 
+Diagram of the request flow:
+
+    Client
+      |
+      |  POST /ask {"query": "..."}
+      v
+    FastAPI (main.py) -- validates AskRequest
+      |
+      v
+    LangGraph (graph.py)
+      |
+      [classify_intent] -- keyword match?
+        |                  |
+      policy            general
+        v                  v
+      [retrieve_and_answer]   [direct_answer]
+        |                          |
+        v                          |
+      ChromaDB (embeddings          |
+      from 8 policy docs)           |
+        |                           |
+        v                           v
+      answer / sources / confidence
+      validated via SupportResponse (schemas.py)
+        |
+        v
+      JSON response to client
+
 **Ingestion:** 8 plain-text policy documents live in support_assistant/docs/ (doc_01.txt through doc_08.txt), one Zepto policy per file (delivery, returns, membership, tracking, cancellation, damaged items, gift cards, support hours). Each document is used whole as a single chunk, given its short length. build_index.py reads all 8 files and pairs each with a human-readable title via a doc_titles dictionary.
 
 **Embedding:** build_index.py uses sentence-transformers (all-MiniLM-L6-v2) to convert each document's text into a 384-dimensional vector locally (no API call). These embeddings, along with the raw text and title metadata, are stored in a persistent ChromaDB collection named zepto_policies, saved to disk at support_assistant/chroma_db/.

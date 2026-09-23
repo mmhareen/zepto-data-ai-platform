@@ -1,5 +1,8 @@
 # Zepto Data & AI Platform
 
+![Python](https://img.shields.io/badge/python-3.12%2F3.13-blue)
+![Status](https://img.shields.io/badge/status-complete-brightgreen)
+
 End-to-end data pipeline, predictive analytics, and a local LangGraph RAG
 support assistant, built as a capstone project for Zepto's analytics guild.
 
