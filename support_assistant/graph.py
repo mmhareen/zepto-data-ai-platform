@@ -5,9 +5,9 @@ Every node's generation step branches on the MOCK_LLM environment variable.
 MOCK_LLM unset or "1" (the default, graded baseline) uses deterministic,
 rule-based logic with no LLM call. MOCK_LLM=0 is an optional, ungraded
 extension: a real LLM call is not implemented in this baseline, but the
-retry-with-corrective-instruction scaffolding required by the assignment
-is present below so the structure exists even though it can never be
-exercised while MOCK_LLM defaults to "1".
+structured prompt template and the retry-with-corrective-instruction
+scaffolding required by the assignment are both present below, even
+though they can never be exercised while MOCK_LLM defaults to "1".
 """
 import os
 from typing import TypedDict
@@ -16,6 +16,7 @@ from pydantic import ValidationError
 from sentence_transformers import SentenceTransformer
 from langgraph.graph import StateGraph, END
 from .schemas import SupportResponse
+from .prompt_template import PROMPT_TEMPLATE
 
 MOCK_LLM = os.environ.get("MOCK_LLM", "1")
 
@@ -132,10 +133,12 @@ def retrieve_and_answer(state: GraphState) -> GraphState:
             confidence=1.0
         )
     else:
-        # Optional MOCK_LLM=0 extension: would prompt a real LLM using the
-        # structured template in prompt_template.py, grounded in
-        # top_chunk_texts, and validate/retry via _call_llm_and_validate.
-        prompt = f"Context: {top_chunk_texts}\nQuestion: {query}"
+        # Optional MOCK_LLM=0 extension: builds the actual structured
+        # prompt from prompt_template.py, grounded in the retrieved
+        # chunks, then would call a real LLM and validate/retry the
+        # output via _call_llm_and_validate.
+        context_text = "\n\n".join(top_chunk_texts)
+        prompt = PROMPT_TEMPLATE.format(context=context_text, question=query)
         validated = _call_llm_and_validate(prompt, sources=top_chunk_ids)
 
     return {**state, **validated.model_dump()}
@@ -154,7 +157,9 @@ def direct_answer(state: GraphState) -> GraphState:
         )
     else:
         # Optional MOCK_LLM=0 extension: would prompt the LLM directly,
-        # no retrieval, validated/retried via _call_llm_and_validate.
+        # no retrieval (the structured template is retrieval-specific,
+        # so it isn't used for this no-context path), validated/retried
+        # via _call_llm_and_validate.
         validated = _call_llm_and_validate(state["query"], sources=[])
 
     return {**state, **validated.model_dump()}
